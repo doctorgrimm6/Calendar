@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Цветной календарь отпусков 2026</title>
     <style>
-        :root { --primary: #2563eb; --danger: #ef4444; --bg: #f8fafc; --panel: #ffffff; }
+        :root { --primary: #2563eb; --success: #16a34a; --danger: #ef4444; --bg: #f8fafc; --panel: #ffffff; }
         body { font-family: 'Inter', 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; font-size: 13px; }
         .container { max-width: 1600px; margin: 0 auto; }
         .grid-layout { display: grid; grid-template-columns: 420px 1fr; gap: 25px; }
@@ -17,16 +17,17 @@
         button { background: var(--primary); color: white; border: none; cursor: pointer; font-weight: 600; transition: 0.2s; }
         button:hover { opacity: 0.9; transform: translateY(-1px); }
         .btn-del { background: #fee2e2; color: #dc2626; width: auto; padding: 4px 10px; font-size: 11px; }
+        .btn-secondary { background: #64748b; margin-top: 10px; }
 
         .color-input { width: 50px; height: 38px; padding: 2px; cursor: pointer; border: none; background: none; }
         .dept-row { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
 
-        .manage-list { max-height: 150px; overflow-y: auto; margin-top: 10px; border-radius: 8px; background: #fcfcfc; }
+        .manage-list { max-height: 150px; overflow-y: auto; margin-top: 10px; border-radius: 8px; background: #fcfcfc; border: 1px solid #f1f5f9; }
         .manage-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid #f1f5f9; }
 
         /* Календарь */
         .calendar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
-        .month { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .month { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; }
         .month-title { text-align: center; font-weight: 800; margin-bottom: 12px; color: #334155; text-transform: uppercase; letter-spacing: 1px; }
         .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
         
@@ -37,7 +38,6 @@
         }
         .day.weekend { color: var(--danger); background: #fef2f2; }
         
-        /* Стили отпуска */
         .day.vacation { color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.3); font-weight: bold; }
         .day.conflict { 
             outline: 3px solid var(--danger); outline-offset: -3px; 
@@ -46,8 +46,9 @@
 
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
-        .conflict-msg { color: #b91c1c; padding: 10px; background: #fef2f2; border-radius: 8px; margin-bottom: 8px; border: 1px solid #fee2e2; font-weight: 500; }
-        .relation-manager { background: #f0fdf4; border-color: #dcfce7; }
+        .conflict-msg { color: #b91c1c; padding: 10px; background: #fef2f2; border-radius: 8px; margin-bottom: 8px; border: 1px solid #fee2e2; }
+        .header-actions { display: flex; gap: 10px; }
+        .header-actions button { width: auto; font-size: 12px; padding: 8px 15px; }
     </style>
 </head>
 <body>
@@ -55,7 +56,6 @@
 <div class="container">
     <div class="grid-layout">
         <div class="sidebar">
-            <!-- ОТДЕЛЫ -->
             <div class="panel">
                 <h3>🏢 Отделы и Цвета</h3>
                 <div class="dept-row">
@@ -66,7 +66,6 @@
                 <div id="listDepts" class="manage-list"></div>
             </div>
 
-            <!-- СОТРУДНИКИ -->
             <div class="panel">
                 <h3>👥 Сотрудники</h3>
                 <input type="text" id="empName" placeholder="ФИО сотрудника">
@@ -75,38 +74,40 @@
                 <div id="listEmployees" class="manage-list"></div>
             </div>
 
-            <!-- ЗАПРЕТЫ -->
-            <div class="panel relation-manager">
-                <h3>🔗 Правила (Несовместимость)</h3>
+            <div class="panel" style="background:#f0fdf4">
+                <h3>🔗 Правила несовместимости</h3>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px">
                     <select id="relA"></select>
                     <select id="relB"></select>
                 </div>
-                <button onclick="addRelation()" style="background:#16a34a">Запретить пересечение</button>
+                <button onclick="addRelation()" style="background:var(--success)">Запретить пересечение</button>
                 <div id="listAllRestrictions" class="manage-list"></div>
             </div>
 
-            <!-- ОТПУСКА -->
             <div class="panel">
-                <h3>📅 График</h3>
+                <h3>📅 Добавить отпуск</h3>
                 <select id="selectEmp"></select>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                     <input type="date" id="vacStart" value="2026-06-01">
                     <input type="date" id="vacEnd" value="2026-06-14">
                 </div>
-                <button onclick="addVacation()">Добавить отпуск</button>
+                <button onclick="addVacation()">Внести в график</button>
                 <div id="listVacations" class="manage-list"></div>
             </div>
+            
+            <button class="btn-secondary" onclick="clearAllData()">🗑️ Сбросить все данные</button>
         </div>
 
         <div class="main-content">
             <div class="panel">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
-                    <h2 style="margin:0; color:#0f172a">Производственный календарь 2026</h2>
-                    <div id="conflicts-count"></div>
+                    <h2 style="margin:0; color:#0f172a">График отпусков 2026</h2>
+                    <div class="header-actions">
+                        <div id="conflicts-count" style="align-self:center; margin-right:15px"></div>
+                        <button onclick="exportData()" style="background:var(--success)">📥 Скачать список (TXT)</button>
+                    </div>
                 </div>
                 <div class="calendar-grid" id="calendar"></div>
-                
                 <div id="conflicts-log" style="margin-top:20px"></div>
             </div>
         </div>
@@ -114,15 +115,15 @@
 </div>
 
 <script>
-    let data = JSON.parse(localStorage.getItem('vacationData_v6')) || {
-        depts: [], // {name, color}
+    let data = JSON.parse(localStorage.getItem('vacationData_v7')) || {
+        depts: [],
         employees: [],
         vacations: [],
         restrictions: []
     };
 
     function save() {
-        localStorage.setItem('vacationData_v6', JSON.stringify(data));
+        localStorage.setItem('vacationData_v7', JSON.stringify(data));
         renderAll();
     }
 
@@ -169,6 +170,44 @@
         }
     }
 
+    function clearAllData() {
+        if(confirm("Вы уверены, что хотите полностью очистить календарь?")) {
+            data = { depts: [], employees: [], vacations: [], restrictions: [] };
+            save();
+        }
+    }
+
+    function exportData() {
+        if (data.vacations.length === 0 && data.employees.length === 0) {
+            alert("Нет данных для выгрузки");
+            return;
+        }
+
+        let text = "=== ОТЧЕТ ПО ГРАФИКУ ОТПУСКОВ 2026 ===\n";
+        text += `Сформировано: ${new Date().toLocaleString()}\n`;
+        text += "=".repeat(40) + "\n\n";
+
+        text += "--- ПОФАМИЛЬНЫЙ СПИСОК ---\n";
+        const sortedVacations = [...data.vacations].sort((a, b) => {
+            const nameA = data.employees.find(e => e.id === a.empId)?.name || "";
+            const nameB = data.employees.find(e => e.id === b.empId)?.name || "";
+            return nameA.localeCompare(nameB);
+        });
+
+        sortedVacations.forEach(v => {
+            const emp = data.employees.find(e => e.id === v.empId);
+            const dept = emp ? `[${emp.dept}]` : "[Удален]";
+            text += `${(emp?.name || "Неизвестен").padEnd(30)} ${dept.padEnd(20)} | ${v.start} -> ${v.end}\n`;
+        });
+
+        const blob = new Blob([text], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `vacations_2026_list.txt`;
+        a.click();
+    }
+
     function renderAll() {
         updateSelectors();
         renderLists();
@@ -177,7 +216,7 @@
 
     function updateSelectors() {
         const deptsHtml = data.depts.map(d => `<option value="${d.name}">${d.name}</option>`).join('');
-        document.getElementById('empDept').innerHTML = deptsHtml;
+        document.getElementById('empDept').innerHTML = deptsHtml || '<option>Сначала создайте отдел</option>';
 
         const empsHtml = data.employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
         document.getElementById('relA').innerHTML = empsHtml;
@@ -186,34 +225,23 @@
     }
 
     function renderLists() {
-        // Отделы
         document.getElementById('listDepts').innerHTML = data.depts.map((d, i) => `
             <div class="manage-item">
-                <span style="border-left: 10px solid ${d.color}; padding-left: 10px;">${d.name}</span>
+                <span style="border-left: 8px solid ${d.color}; padding-left: 10px;">${d.name}</span>
                 <button class="btn-del" onclick="data.depts.splice(${i},1);save()">×</button>
             </div>
         `).join('');
 
-        // Сотрудники
         document.getElementById('listEmployees').innerHTML = data.employees.map(e => `
             <div class="manage-item">
-                <span>${e.name} <small>(${e.dept})</small></span>
+                <span>${e.name}</span>
                 <button class="btn-del" onclick="deleteEmp(${e.id})">×</button>
             </div>
         `).join('');
 
-        // Запреты
-        document.getElementById('listAllRestrictions').innerHTML = data.restrictions.map((r, i) => `
-            <div class="manage-item" style="font-size:0.8em">
-                <span>${data.employees.find(e=>e.id===r[0])?.name} ↔ ${data.employees.find(e=>e.id===r[1])?.name}</span>
-                <button class="btn-del" onclick="data.restrictions.splice(${i},1);save()">×</button>
-            </div>
-        `).join('');
-
-        // Список отпусков
         document.getElementById('listVacations').innerHTML = data.vacations.map(v => `
-            <div class="manage-item" style="font-size:0.8em">
-                <span>${data.employees.find(e=>e.id===v.empId)?.name} (${v.start})</span>
+            <div class="manage-item">
+                <span style="font-size:11px">${data.employees.find(e=>e.id===v.empId)?.name}</span>
                 <button class="btn-del" onclick="data.vacations=data.vacations.filter(x=>x.id!==${v.id});save()">×</button>
             </div>
         `).join('');
@@ -230,7 +258,6 @@
         const container = document.getElementById('calendar');
         container.innerHTML = '';
         const months = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
-        
         let logs = [];
 
         for (let m = 0; m < 12; m++) {
@@ -241,40 +268,30 @@
                 const dateStr = `2026-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                 const dateObj = new Date(2026, m, d);
                 const isWeekend = dateObj.getDay()===0 || dateObj.getDay()===6;
-                
                 const dayVacs = data.vacations.filter(v => dateStr >= v.start && dateStr <= v.end);
+                
                 let classes = ['day'];
                 if(isWeekend) classes.push('weekend');
-
                 let style = "";
+
                 if(dayVacs.length > 0) {
                     classes.push('vacation');
-                    
-                    // Собираем уникальные цвета отделов
                     const deptColors = [...new Set(dayVacs.map(v => {
                         const emp = data.employees.find(e => e.id === v.empId);
-                        return data.depts.find(d => d.name === emp?.dept)?.color || '#94a3b8';
+                        return data.depts.find(dept => dept.name === emp?.dept)?.color || '#94a3b8';
                     }))];
 
-                    if(deptColors.length === 1) {
-                        style = `background: ${deptColors[0]};`;
-                    } else if(deptColors.length === 2) {
-                        style = `background: linear-gradient(45deg, ${deptColors[0]} 50%, ${deptColors[1]} 50%);`;
-                    } else {
-                        // Если 3 и более - полоски
-                        const step = 100 / deptColors.length;
-                        const gradient = deptColors.map((c, i) => `${c} ${i*step}%, ${c} ${(i+1)*step}%`).join(', ');
-                        style = `background: linear-gradient(45deg, ${gradient});`;
-                    }
+                    if(deptColors.length === 1) style = `background:${deptColors[0]}`;
+                    else if(deptColors.length === 2) style = `background:linear-gradient(45deg, ${deptColors[0]} 50%, ${deptColors[1]} 50%)`;
+                    else style = `background:repeating-linear-gradient(45deg, ${deptColors[0]}, ${deptColors[0]} 5px, ${deptColors[1]} 5px, ${deptColors[1]} 10px)`;
 
-                    // Проверка конфликтов
                     const hasConflict = data.restrictions.some(r => {
                         const hasA = dayVacs.some(v => v.empId === r[0]);
                         const hasB = dayVacs.some(v => v.empId === r[1]);
                         if(hasA && hasB) {
                             const eA = data.employees.find(e => e.id === r[0]);
                             const eB = data.employees.find(e => e.id === r[1]);
-                            const logEntry = `❌ ${dateStr}: ${eA.name} ↔ ${eB.name}`;
+                            const logEntry = `⚠️ ${dateStr}: Пересечение ${eA.name} и ${eB.name}`;
                             if(!logs.includes(logEntry)) logs.push(logEntry);
                             return true;
                         }
@@ -283,59 +300,14 @@
                     if(hasConflict) classes.push('conflict');
                 }
 
-                const names = dayVacs.map(v => data.employees.find(e => e.id === v.empId)?.name).join('\n');
-                html += `<div class="${classes.join(' ')}" style="${style}" title="${names}">${d}</div>`;
+                html += `<div class="${classes.join(' ')}" style="${style}">${d}</div>`;
             }
             container.innerHTML += html + `</div></div>`;
         }
-        
         document.getElementById('conflicts-log').innerHTML = logs.map(l => `<div class="conflict-msg">${l}</div>`).join('');
-        document.getElementById('conflicts-count').innerHTML = logs.length ? `<b style="color:var(--danger)">Конфликтов: ${logs.length}</b>` : '<b style="color:#16a34a">Конфликтов нет</b>';
-    }
-function exportData() {
-    if (data.vacations.length === 0 && data.employees.length === 0) {
-        alert("Нет данных для выгрузки");
-        return;
+        document.getElementById('conflicts-count').innerHTML = logs.length ? `<span style="color:var(--danger); font-weight:bold">Конфликтов: ${logs.length}</span>` : `<span style="color:var(--success)">Ошибок нет</span>`;
     }
 
-    let text = "=== БЭКАП ГРАФИКА ОТПУСКОВ 2026 ===\n";
-    text += `Дата выгрузки: ${new Date().toLocaleString()}\n\n`;
-
-    text += "--- ОТДЕЛЫ ---\n";
-    data.depts.forEach(d => text += `• ${d.name} (цвет: ${d.color})\n`);
-
-    text += "\n--- СОТРУДНИКИ ---\n";
-    data.employees.forEach(e => {
-        const restrictions = data.restrictions
-            .filter(r => r.includes(e.id))
-            .map(r => {
-                const otherId = r[0] === e.id ? r[1] : r[0];
-                return data.employees.find(emp => emp.id === otherId)?.name;
-            }).join(", ");
-        text += `• ${e.name} [Отдел: ${e.dept}] ${restrictions ? "(Запрет с: " + restrictions + ")" : ""}\n`;
-    });
-
-    text += "\n--- ПЕРИОДЫ ОТПУСКОВ (ПОФАМИЛЬНО) ---\n";
-    // Сортируем отпуска по фамилии сотрудника для удобства чтения
-    const sortedVacations = [...data.vacations].sort((a, b) => {
-        const nameA = data.employees.find(e => e.id === a.empId)?.name || "";
-        const nameB = data.employees.find(e => e.id === b.empId)?.name || "";
-        return nameA.localeCompare(nameB);
-    });
-
-    sortedVacations.forEach(v => {
-        const emp = data.employees.find(e => e.id === v.empId);
-        text += `${emp ? emp.name.padEnd(30) : "Удален".padEnd(30)} | ${v.start} ---> ${v.end}\n`;
-    });
-
-    // Создание файла и скачивание
-    const blob = new Blob([text], { type: 'text/plain' });
-    const anchor = document.createElement('a');
-    anchor.download = `vacations_backup_2026_${new Date().toISOString().slice(0,10)}.txt`;
-    anchor.href = (window.URL || window.webkitURL).createObjectURL(blob);
-    anchor.dataset.downloadurl = ['text/plain', anchor.download, anchor.href].join(':');
-    anchor.click();
-}
     renderAll();
 </script>
 </body>
