@@ -292,7 +292,50 @@
         document.getElementById('conflicts-log').innerHTML = logs.map(l => `<div class="conflict-msg">${l}</div>`).join('');
         document.getElementById('conflicts-count').innerHTML = logs.length ? `<b style="color:var(--danger)">Конфликтов: ${logs.length}</b>` : '<b style="color:#16a34a">Конфликтов нет</b>';
     }
+function exportData() {
+    if (data.vacations.length === 0 && data.employees.length === 0) {
+        alert("Нет данных для выгрузки");
+        return;
+    }
 
+    let text = "=== БЭКАП ГРАФИКА ОТПУСКОВ 2026 ===\n";
+    text += `Дата выгрузки: ${new Date().toLocaleString()}\n\n`;
+
+    text += "--- ОТДЕЛЫ ---\n";
+    data.depts.forEach(d => text += `• ${d.name} (цвет: ${d.color})\n`);
+
+    text += "\n--- СОТРУДНИКИ ---\n";
+    data.employees.forEach(e => {
+        const restrictions = data.restrictions
+            .filter(r => r.includes(e.id))
+            .map(r => {
+                const otherId = r[0] === e.id ? r[1] : r[0];
+                return data.employees.find(emp => emp.id === otherId)?.name;
+            }).join(", ");
+        text += `• ${e.name} [Отдел: ${e.dept}] ${restrictions ? "(Запрет с: " + restrictions + ")" : ""}\n`;
+    });
+
+    text += "\n--- ПЕРИОДЫ ОТПУСКОВ (ПОФАМИЛЬНО) ---\n";
+    // Сортируем отпуска по фамилии сотрудника для удобства чтения
+    const sortedVacations = [...data.vacations].sort((a, b) => {
+        const nameA = data.employees.find(e => e.id === a.empId)?.name || "";
+        const nameB = data.employees.find(e => e.id === b.empId)?.name || "";
+        return nameA.localeCompare(nameB);
+    });
+
+    sortedVacations.forEach(v => {
+        const emp = data.employees.find(e => e.id === v.empId);
+        text += `${emp ? emp.name.padEnd(30) : "Удален".padEnd(30)} | ${v.start} ---> ${v.end}\n`;
+    });
+
+    // Создание файла и скачивание
+    const blob = new Blob([text], { type: 'text/plain' });
+    const anchor = document.createElement('a');
+    anchor.download = `vacations_backup_2026_${new Date().toISOString().slice(0,10)}.txt`;
+    anchor.href = (window.URL || window.webkitURL).createObjectURL(blob);
+    anchor.dataset.downloadurl = ['text/plain', anchor.download, anchor.href].join(':');
+    anchor.click();
+}
     renderAll();
 </script>
 </body>
